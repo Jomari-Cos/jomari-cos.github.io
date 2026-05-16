@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#6366f1"/>
+  <circle cx="200" cy="180" r="80" fill="white" opacity="0.9"/>
+  <text x="200" y="320" font-family="Arial" font-size="36" fill="white" text-anchor="middle" dominant-baseline="middle">Jomari</text>
+</svg>
