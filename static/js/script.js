@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    initThemeToggle();
-    initHamburgerMenu();
-    initBackToTop();
-    initCarousel();
-    initScrollAnimations();
-    initContactForm();
-    initTypingAnimation();
-});
+      initThemeToggle();
+      initHamburgerMenu();
+      initBackToTop();
+      initCarousel();
+      initImageCarousels();
+      initScrollAnimations();
+      initContactForm();
+      initTypingAnimation();
+  });
 
 function initThemeToggle() {
     const toggle = document.querySelector('.theme-toggle');
@@ -33,12 +34,14 @@ function initHamburgerMenu() {
     hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navMenu.classList.toggle('active');
+        document.body.classList.toggle('nav-open');
     });
 
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
             hamburger.classList.remove('active');
             navMenu.classList.remove('active');
+            document.body.classList.remove('nav-open');
         });
     });
 }
@@ -70,6 +73,7 @@ function initCarousel() {
     if (!track) return;
 
     let currentIndex = 0;
+    let autoAdvanceInterval;
 
     function updateCarousel() {
         const cardWidth = cards[0].offsetWidth + 32;
@@ -78,6 +82,28 @@ function initCarousel() {
         dots.forEach((dot, index) => {
             dot.classList.toggle('active', index === currentIndex);
         });
+        
+        // Reset auto-advance timer when manually changing slides
+        resetAutoAdvance();
+    }
+
+    function startAutoAdvance() {
+        // Clear any existing interval
+        clearInterval(autoAdvanceInterval);
+        // Set new interval to advance every 6 seconds for smoother experience
+        autoAdvanceInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % cards.length;
+            updateCarousel();
+        }, 6000);
+    }
+
+    function resetAutoAdvance() {
+        // Clear and restart the auto-advance timer directly
+        clearInterval(autoAdvanceInterval);
+        autoAdvanceInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % cards.length;
+            updateCarousel();
+        }, 6000);
     }
 
     prevBtn?.addEventListener('click', () => {
@@ -111,6 +137,111 @@ function initCarousel() {
             currentIndex = (currentIndex - 1 + cards.length) % cards.length;
             updateCarousel();
         }
+    });
+    
+    // Start auto-advance when the page loads
+    startAutoAdvance();
+    
+    // Pause auto-advance when user hovers over the carousel
+    const carouselContainer = document.querySelector('.carousel-container');
+    if (carouselContainer) {
+        carouselContainer.addEventListener('mouseenter', () => {
+            clearInterval(autoAdvanceInterval);
+        });
+        
+        carouselContainer.addEventListener('mouseleave', () => {
+            startAutoAdvance();
+        });
+    }
+}
+
+function initImageCarousels() {
+    const carouselWrappers = document.querySelectorAll('.project-image-carousel');
+    
+    carouselWrappers.forEach(wrapper => {
+        const track = wrapper.querySelector('.image-carousel-track');
+        const images = wrapper.querySelectorAll('.image-carousel-track img');
+        const prevBtn = wrapper.querySelector('.image-carousel-btn.prev');
+        const nextBtn = wrapper.querySelector('.image-carousel-btn.next');
+        const dots = wrapper.querySelectorAll('.image-carousel-dots .dot');
+        
+        if (!track || images.length === 0) return;
+        
+        let currentIndex = 0;
+        let autoAdvanceInterval;
+        
+        function updateImageCarousel() {
+            const imageWidth = images[0].offsetWidth;
+            track.style.transform = `translateX(-${currentIndex * imageWidth}px)`;
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+        
+        function startAutoAdvance() {
+            // Clear any existing interval
+            clearInterval(autoAdvanceInterval);
+            // Set new interval to advance every 4 seconds for smoother experience
+            autoAdvanceInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateImageCarousel();
+            }, 4000);
+        }
+        
+        function resetAutoAdvance() {
+            // Clear and restart the auto-advance timer directly
+            clearInterval(autoAdvanceInterval);
+            autoAdvanceInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateImageCarousel();
+            }, 4000);
+        }
+        
+        prevBtn?.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateImageCarousel();
+        });
+        
+        nextBtn?.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateImageCarousel();
+        });
+        
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentIndex = index;
+                updateImageCarousel();
+            });
+        });
+        
+        let startX, endX;
+        track.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+        });
+        
+        track.addEventListener('touchend', e => {
+            endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateImageCarousel();
+            } else if (endX - startX > 50) {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateImageCarousel();
+            }
+        });
+        
+        // Start auto-advance when the page loads
+        startAutoAdvance();
+        
+        // Pause auto-advance when user hovers over the image carousel
+        wrapper.addEventListener('mouseenter', () => {
+            clearInterval(autoAdvanceInterval);
+        });
+        
+        wrapper.addEventListener('mouseleave', () => {
+            startAutoAdvance();
+        });
     });
 }
 
