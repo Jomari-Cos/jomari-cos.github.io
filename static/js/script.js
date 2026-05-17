@@ -66,7 +66,7 @@ function initBackToTop() {
 function initCarousel() {
     const track = document.querySelector('.carousel-track');
     const cards = document.querySelectorAll('.project-card');
-    const dots = document.querySelectorAll('.dot');
+    const dots = document.querySelectorAll('.carousel-dots .dot');
     const prevBtn = document.querySelector('.carousel-btn.prev');
     const nextBtn = document.querySelector('.carousel-btn.next');
 
