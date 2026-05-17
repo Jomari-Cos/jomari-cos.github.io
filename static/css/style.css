@@ -293,10 +293,15 @@ body.light-mode .hamburger span {
 }
 
 .hero-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
+     display: flex;
+     gap: 1rem;
+     flex-wrap: wrap;
+ }
+
+ .hero-text {
+     padding: 1rem 0;
+     margin: 0 1.5rem;
+ }
 
 .btn {
     padding: 0.875rem 1.75rem;
