@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initContactForm();
     initTypingAnimation();
     initSmoothScroll();
-  });
+    initChatBot();
+});
 
   function initSmoothScroll() {
     const links = document.querySelectorAll('a[href^="#"]');
@@ -311,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Wait for DOM to be fully loaded
         function initializeChatBot() {
-            // DOM
+            // Return early if elements aren't found
             const widget      = document.getElementById('chatbot-widget');
             const toggleBtn   = document.getElementById('chatbotToggle');
             const chatBox     = document.getElementById('chatbotBox');
@@ -320,7 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputEl     = document.getElementById('chatbotInput');
             const sendBtn     = document.getElementById('chatbotSend');
 
-            // Return early if elements aren't found
             if (!widget || !toggleBtn || !chatBox || !closeBtn || !messagesEl || !inputEl || !sendBtn) {
                 console.warn('ChatBot elements not found in DOM');
                 return;
