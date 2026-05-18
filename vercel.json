@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/chat.js": {
-      "runtime": "nodejs22.x@1"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
