@@ -365,7 +365,7 @@
                         </div>
                     </div>
                     <div class="timeline-item">
-                        <div class="timeline-date">January - Mary 2026</div>
+                        <div class="timeline-date">January - May 2026</div>
                         <div class="timeline-content glass-card">
                             <h3>Capstone Project</h3>
                             <h4>EduTrack Academic Management</h4>
@@ -448,5 +448,26 @@
     <button class="back-to-top" aria-label="Back to top"><i class="fas fa-arrow-up"></i></button>
 
     <script src="static/js/script.js"></script>
+    <!-- OpenAI ChatBot Widget -->
+    <div id="chatbot-widget" class="chatbot-widget">
+        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Toggle chat">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+        <div class="chatbot-box" id="chatbotBox">
+            <div class="chatbot-header">
+                <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                <button class="chatbot-close" id="chatbotClose">&times;</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot-message">
+                    <p>Hello! I'm Jomari's AI assistant. Ask me anything about his projects, skills, or experience!</p>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbotInput" placeholder="Type a message..." />
+                <button id="chatbotSend" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

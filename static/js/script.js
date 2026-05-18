@@ -301,7 +301,7 @@ function initTypingAnimation() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const links = document.querySelectorAll('a[href^="#"]');
-    
+
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -315,3 +315,142 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+/* ===== OpenAI ChatBot ===== */
+(function initChatBot() {
+    const OPENAI_API_KEY = ''; // Replace with your OpenAI API key
+    const OPENAI_PROXY_URL = 'https://your-proxy.example.com/chat'; // optional proxy
+    const OPENAI_MODEL = 'gpt-4o-mini';
+
+    // DOM
+    const widget      = document.getElementById('chatbot-widget');
+    const toggleBtn   = document.getElementById('chatbotToggle');
+    const chatBox     = document.getElementById('chatbotBox');
+    const closeBtn    = document.getElementById('chatbotClose');
+    const messagesEl  = document.getElementById('chatbotMessages');
+    const inputEl     = document.getElementById('chatbotInput');
+    const sendBtn     = document.getElementById('chatbotSend');
+
+    // State
+    let isOpen   = false;
+    let isTyping = false;
+    let history  = [];
+
+    // --- ui helpers ---
+    function openChat() {
+        isOpen = true;
+        chatBox.classList.add('open');
+        setTimeout(() => inputEl.focus(), 300);
+    }
+
+    function closeChat() {
+        isOpen = false;
+        chatBox.classList.remove('open');
+    }
+
+    function addMessage(text, type) {
+        const div      = document.createElement('div');
+        div.className  = 'message ' + (type === 'bot' ? 'bot-message' : 'user-message');
+        div.textContent = text;
+        messagesEl.appendChild(div);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function showTyping() {
+        const el = document.createElement('div');
+        el.className = 'chatbot-typing';
+        el.id = 'chatbotTyping';
+        el.textContent = 'AI is typing';
+        messagesEl.appendChild(el);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+        document.getElementById('chatbotTyping')?.remove();
+    }
+
+    // --- OpenRouter placeholder (swap in your own key / proxy) ---
+    async function getBotReply(userMessage) {
+        const systemPrompt = `You are a helpful assistant for Jomari Cos's portfolio.
+        Jomari is an AI Automation Developer & Student Innovator.
+        His skills: Python, JavaScript, HTML/CSS, SQL, Flask, Selenium, Playwright, Supabase, Make, Google Apps Script.
+        His projects: EduTrack (academic management), SMART SOFT COPY (grading automation), Photo Album Web App, Data Analysis internship at Digital Agile Ventures.
+        Be concise, professional, and enthusiastic. If unsure, say you can connect visitors with Jomari via the contact form.`;
+
+        if (OPENAI_PROXY_URL) {
+            // Proxy mode (recommended for serverless hosting)
+            const resp = await fetch(OPENAI_PROXY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model: OPENAI_MODEL, messages: [...history, { role: 'user', content: userMessage }] }),
+            });
+            const data = await resp.json();
+            return data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
+        }
+
+        if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY') {
+            return 'The chatbot API key is not configured yet. Add your OpenAI key in static/js/script.js and the chatbot will be fully functional.';
+        }
+
+        // Direct OpenAI API call
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...history,
+            { role: 'user', content: userMessage },
+        ];
+
+        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+            },
+            body: JSON.stringify({ model: OPENAI_MODEL, messages, max_tokens: 512 }),
+        });
+
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        return data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
+    }
+
+    async function sendMessage() {
+        const text = inputEl.value.trim();
+        if (!text || isTyping) return;
+
+        inputEl.value = '';
+        addMessage(text, 'user');
+        history.push({ role: 'user', content: text });
+
+        isTyping = true;
+        showTyping();
+
+        try {
+            const reply = await getBotReply(text);
+            removeTyping();
+            addMessage(reply, 'bot');
+            history.push({ role: 'assistant', content: reply });
+        } catch (err) {
+            removeTyping();
+            addMessage('Oops! Something went wrong. Please try again.', 'bot');
+            console.error(err);
+        } finally {
+            isTyping = false;
+        }
+    }
+
+    // --- Event listeners ---
+    toggleBtn.addEventListener('click', () => isOpen ? closeChat() : openChat());
+    closeBtn.addEventListener('click', closeChat);
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+
+    // Close on outside click
+    document.addEventListener('click', e => {
+        if (isOpen && !widget.contains(e.target)) closeChat();
+    });
+})();
