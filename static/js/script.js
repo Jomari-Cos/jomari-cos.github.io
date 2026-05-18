@@ -7,450 +7,130 @@ document.addEventListener('DOMContentLoaded', () => {
       initScrollAnimations();
       initContactForm();
       initTypingAnimation();
-  });
-
-function initThemeToggle() {
-    const toggle = document.querySelector('.theme-toggle');
-    const body = document.body;
-
-    if (localStorage.getItem('theme') === 'light') {
-        body.classList.add('light-mode');
-        toggle.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-
-    toggle.addEventListener('click', () => {
-        body.classList.toggle('light-mode');
-        const isLight = body.classList.contains('light-mode');
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
-        toggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
-}
-
-function initHamburgerMenu() {
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
-
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-        document.body.classList.toggle('nav-open');
     });
 
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.classList.remove('nav-open');
-        });
-    });
-}
+    /* ===== OpenAI ChatBot ===== */
+    (function initChatBot() {
+        const API_ENDPOINT = '/api/chat'; // Vercel serverless function endpoint
 
-function initBackToTop() {
-    const backToTop = document.querySelector('.back-to-top');
+        // Wait for DOM to be fully loaded
+        function initializeChatBot() {
+            // DOM
+            const widget      = document.getElementById('chatbot-widget');
+            const toggleBtn   = document.getElementById('chatbotToggle');
+            const chatBox     = document.getElementById('chatbotBox');
+            const closeBtn    = document.getElementById('chatbotClose');
+            const messagesEl  = document.getElementById('chatbotMessages');
+            const inputEl     = document.getElementById('chatbotInput');
+            const sendBtn     = document.getElementById('chatbotSend');
 
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            backToTop.classList.add('visible');
-        } else {
-            backToTop.classList.remove('visible');
-        }
-    });
-
-    backToTop.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-}
-
-function initCarousel() {
-    const track = document.querySelector('.carousel-track');
-    const cards = document.querySelectorAll('.project-card');
-    const dots = document.querySelectorAll('.carousel-dots .dot');
-    const prevBtn = document.querySelector('.carousel-btn.prev');
-    const nextBtn = document.querySelector('.carousel-btn.next');
-
-    if (!track) return;
-
-    let currentIndex = 0;
-    let autoAdvanceInterval;
-
-    function updateCarousel() {
-        const cardWidth = cards[0].offsetWidth + 32;
-        track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
-
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentIndex);
-        });
-        
-        // Reset auto-advance timer when manually changing slides
-        resetAutoAdvance();
-    }
-
-    function startAutoAdvance() {
-        // Clear any existing interval
-        clearInterval(autoAdvanceInterval);
-        // Set new interval to advance every 6 seconds for smoother experience
-        autoAdvanceInterval = setInterval(() => {
-            currentIndex = (currentIndex + 1) % cards.length;
-            updateCarousel();
-        }, 6000);
-    }
-
-    function resetAutoAdvance() {
-        // Clear and restart the auto-advance timer directly
-        clearInterval(autoAdvanceInterval);
-        autoAdvanceInterval = setInterval(() => {
-            currentIndex = (currentIndex + 1) % cards.length;
-            updateCarousel();
-        }, 6000);
-    }
-
-    prevBtn?.addEventListener('click', () => {
-        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
-        updateCarousel();
-    });
-
-    nextBtn?.addEventListener('click', () => {
-        currentIndex = (currentIndex + 1) % cards.length;
-        updateCarousel();
-    });
-
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            currentIndex = index;
-            updateCarousel();
-        });
-    });
-
-    let startX, endX;
-    track.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-    });
-
-    track.addEventListener('touchend', e => {
-        endX = e.changedTouches[0].clientX;
-        if (startX - endX > 50) {
-            currentIndex = (currentIndex + 1) % cards.length;
-            updateCarousel();
-        } else if (endX - startX > 50) {
-            currentIndex = (currentIndex - 1 + cards.length) % cards.length;
-            updateCarousel();
-        }
-    });
-    
-    // Start auto-advance when the page loads
-    startAutoAdvance();
-    
-    // Pause auto-advance when user hovers over the carousel
-    const carouselContainer = document.querySelector('.carousel-container');
-    if (carouselContainer) {
-        carouselContainer.addEventListener('mouseenter', () => {
-            clearInterval(autoAdvanceInterval);
-        });
-        
-        carouselContainer.addEventListener('mouseleave', () => {
-            startAutoAdvance();
-        });
-    }
-}
-
-function initImageCarousels() {
-    const carouselWrappers = document.querySelectorAll('.project-image-carousel');
-    
-    carouselWrappers.forEach(wrapper => {
-        const track = wrapper.querySelector('.image-carousel-track');
-        const images = wrapper.querySelectorAll('.image-carousel-track img');
-        const prevBtn = wrapper.querySelector('.image-carousel-btn.prev');
-        const nextBtn = wrapper.querySelector('.image-carousel-btn.next');
-        const dots = wrapper.querySelectorAll('.image-carousel-dots .dot');
-        
-        if (!track || images.length === 0) return;
-        
-        let currentIndex = 0;
-        let autoAdvanceInterval;
-        
-        function updateImageCarousel() {
-            const imageWidth = images[0].offsetWidth;
-            track.style.transform = `translateX(-${currentIndex * imageWidth}px)`;
-            
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentIndex);
-            });
-        }
-        
-        function startAutoAdvance() {
-            // Clear any existing interval
-            clearInterval(autoAdvanceInterval);
-            // Set new interval to advance every 4 seconds for smoother experience
-            autoAdvanceInterval = setInterval(() => {
-                currentIndex = (currentIndex + 1) % images.length;
-                updateImageCarousel();
-            }, 4000);
-        }
-        
-        function resetAutoAdvance() {
-            // Clear and restart the auto-advance timer directly
-            clearInterval(autoAdvanceInterval);
-            autoAdvanceInterval = setInterval(() => {
-                currentIndex = (currentIndex + 1) % images.length;
-                updateImageCarousel();
-            }, 4000);
-        }
-        
-        prevBtn?.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            updateImageCarousel();
-        });
-        
-        nextBtn?.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % images.length;
-            updateImageCarousel();
-        });
-        
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentIndex = index;
-                updateImageCarousel();
-            });
-        });
-        
-        let startX, endX;
-        track.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-        });
-        
-        track.addEventListener('touchend', e => {
-            endX = e.changedTouches[0].clientX;
-            if (startX - endX > 50) {
-                currentIndex = (currentIndex + 1) % images.length;
-                updateImageCarousel();
-            } else if (endX - startX > 50) {
-                currentIndex = (currentIndex - 1 + images.length) % images.length;
-                updateImageCarousel();
+            // Return early if elements aren't found
+            if (!widget || !toggleBtn || !chatBox || !closeBtn || !messagesEl || !inputEl || !sendBtn) {
+                console.warn('ChatBot elements not found in DOM');
+                return;
             }
-        });
-        
-        // Start auto-advance when the page loads
-        startAutoAdvance();
-        
-        // Pause auto-advance when user hovers over the image carousel
-        wrapper.addEventListener('mouseenter', () => {
-            clearInterval(autoAdvanceInterval);
-        });
-        
-        wrapper.addEventListener('mouseleave', () => {
-            startAutoAdvance();
-        });
-    });
-}
 
-function initScrollAnimations() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+            // State
+            let isOpen   = false;
+            let isTyping = false;
+            let history  = [];
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
-                observer.unobserve(entry.target);
+            // --- ui helpers ---
+            function openChat() {
+                isOpen = true;
+                chatBox.classList.add('open');
+                setTimeout(() => inputEl.focus(), 300);
             }
-        });
-    }, observerOptions);
 
-    document.querySelectorAll('.glass-card, .section-title').forEach(el => {
-        el.style.opacity = '0';
-        observer.observe(el);
-    });
-}
+            function closeChat() {
+                isOpen = false;
+                chatBox.classList.remove('open');
+            }
 
-function initContactForm() {
-    const form = document.getElementById('contactForm');
-    if (!form) return;
+            function addMessage(text, type) {
+                const div      = document.createElement('div');
+                div.className  = 'message ' + (type === 'bot' ? 'bot-message' : 'user-message');
+                div.textContent = text;
+                messagesEl.appendChild(div);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const name = formData.get('name');
+            function showTyping() {
+                const el = document.createElement('div');
+                el.className = 'chatbot-typing';
+                el.id = 'chatbotTyping';
+                el.textContent = 'AI is typing';
+                messagesEl.appendChild(el);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
 
-        alert(`Thanks ${name}! Your message has been sent.`);
-        form.reset();
-    });
-}
+            function removeTyping() {
+                document.getElementById('chatbotTyping')?.remove();
+            }
 
-function initTypingAnimation() {
-    const element = document.querySelector('.typing-text');
-    if (!element) return;
+            // --- ChatBot API call ---
+            async function getBotReply(userMessage) {
+                try {
+                    const resp = await fetch(API_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: history }),
+                    });
 
-    const text = element.textContent;
-    element.textContent = '';
-    let i = 0;
+                    if (!resp.ok) {
+                        throw new Error(`HTTP ${resp.status}`);
+                    }
 
-    function typeWriter() {
-        if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            setTimeout(typeWriter, 100);
-        }
-    }
-
-    setTimeout(typeWriter, 500);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('a[href^="#"]');
-
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href && href !== '#') {
-                const target = document.querySelector(href);
-                if (target) {
-                    e.preventDefault();
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    const data = await resp.json();
+                    return data.reply ?? 'Sorry, I could not generate a response.';
+                } catch (err) {
+                    console.error('ChatBot API error:', err);
+                    throw new Error('Failed to get response from chatbot');
                 }
             }
-        });
-    });
-});
 
-/* ===== OpenAI ChatBot ===== */
-(function initChatBot() {
-    const OPENAI_API_KEY = ''; // Replace with your OpenAI API key
-    const OPENAI_PROXY_URL = 'https://your-proxy.example.com/chat'; // optional proxy
-    const OPENAI_MODEL = 'gpt-4o-mini';
+            async function sendMessage() {
+                const text = inputEl.value.trim();
+                if (!text || isTyping) return;
 
-    // DOM
-    const widget      = document.getElementById('chatbot-widget');
-    const toggleBtn   = document.getElementById('chatbotToggle');
-    const chatBox     = document.getElementById('chatbotBox');
-    const closeBtn    = document.getElementById('chatbotClose');
-    const messagesEl  = document.getElementById('chatbotMessages');
-    const inputEl     = document.getElementById('chatbotInput');
-    const sendBtn     = document.getElementById('chatbotSend');
+                inputEl.value = '';
+                addMessage(text, 'user');
+                history.push({ role: 'user', content: text });
 
-    // State
-    let isOpen   = false;
-    let isTyping = false;
-    let history  = [];
+                isTyping = true;
+                showTyping();
 
-    // --- ui helpers ---
-    function openChat() {
-        isOpen = true;
-        chatBox.classList.add('open');
-        setTimeout(() => inputEl.focus(), 300);
-    }
+                try {
+                    const reply = await getBotReply(text);
+                    removeTyping();
+                    addMessage(reply, 'bot');
+                    history.push({ role: 'assistant', content: reply });
+                } catch (err) {
+                    removeTyping();
+                    addMessage('Oops! Something went wrong. Please try again.', 'bot');
+                    console.error(err);
+                } finally {
+                    isTyping = false;
+                }
+            }
 
-    function closeChat() {
-        isOpen = false;
-        chatBox.classList.remove('open');
-    }
+            // --- Event listeners ---
+            toggleBtn.addEventListener('click', () => isOpen ? closeChat() : openChat());
+            closeBtn.addEventListener('click', closeChat);
 
-    function addMessage(text, type) {
-        const div      = document.createElement('div');
-        div.className  = 'message ' + (type === 'bot' ? 'bot-message' : 'user-message');
-        div.textContent = text;
-        messagesEl.appendChild(div);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+            sendBtn.addEventListener('click', sendMessage);
+            inputEl.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
-    function showTyping() {
-        const el = document.createElement('div');
-        el.className = 'chatbot-typing';
-        el.id = 'chatbotTyping';
-        el.textContent = 'AI is typing';
-        messagesEl.appendChild(el);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function removeTyping() {
-        document.getElementById('chatbotTyping')?.remove();
-    }
-
-    // --- OpenRouter placeholder (swap in your own key / proxy) ---
-    async function getBotReply(userMessage) {
-        const systemPrompt = `You are a helpful assistant for Jomari Cos's portfolio.
-        Jomari is an AI Automation Developer & Student Innovator.
-        His skills: Python, JavaScript, HTML/CSS, SQL, Flask, Selenium, Playwright, Supabase, Make, Google Apps Script.
-        His projects: EduTrack (academic management), SMART SOFT COPY (grading automation), Photo Album Web App, Data Analysis internship at Digital Agile Ventures.
-        Be concise, professional, and enthusiastic. If unsure, say you can connect visitors with Jomari via the contact form.`;
-
-        if (OPENAI_PROXY_URL) {
-            // Proxy mode (recommended for serverless hosting)
-            const resp = await fetch(OPENAI_PROXY_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: OPENAI_MODEL, messages: [...history, { role: 'user', content: userMessage }] }),
+            // Close on outside click
+            document.addEventListener('click', e => {
+                if (isOpen && !widget.contains(e.target)) closeChat();
             });
-            const data = await resp.json();
-            return data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
         }
 
-        if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY') {
-            return 'The chatbot API key is not configured yet. Add your OpenAI key in static/js/script.js and the chatbot will be fully functional.';
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeChatBot);
+        } else {
+            initializeChatBot();
         }
-
-        // Direct OpenAI API call
-        const messages = [
-            { role: 'system', content: systemPrompt },
-            ...history,
-            { role: 'user', content: userMessage },
-        ];
-
-        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`,
-            },
-            body: JSON.stringify({ model: OPENAI_MODEL, messages, max_tokens: 512 }),
-        });
-
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(err.error?.message || `HTTP ${resp.status}`);
-        }
-
-        const data = await resp.json();
-        return data.choices?.[0]?.message?.content ?? 'Sorry, I could not generate a response.';
-    }
-
-    async function sendMessage() {
-        const text = inputEl.value.trim();
-        if (!text || isTyping) return;
-
-        inputEl.value = '';
-        addMessage(text, 'user');
-        history.push({ role: 'user', content: text });
-
-        isTyping = true;
-        showTyping();
-
-        try {
-            const reply = await getBotReply(text);
-            removeTyping();
-            addMessage(reply, 'bot');
-            history.push({ role: 'assistant', content: reply });
-        } catch (err) {
-            removeTyping();
-            addMessage('Oops! Something went wrong. Please try again.', 'bot');
-            console.error(err);
-        } finally {
-            isTyping = false;
-        }
-    }
-
-    // --- Event listeners ---
-    toggleBtn.addEventListener('click', () => isOpen ? closeChat() : openChat());
-    closeBtn.addEventListener('click', closeChat);
-
-    sendBtn.addEventListener('click', sendMessage);
-    inputEl.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-
-    // Close on outside click
-    document.addEventListener('click', e => {
-        if (isOpen && !widget.contains(e.target)) closeChat();
-    });
-})();
+    })();
