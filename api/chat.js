@@ -1,9 +1,16 @@
 import { OpenAI } from 'openai';
 
-// Initialize OpenAI with API key from environment variable
-const openai = new OpenAI({
-  apiKey: process.env.chatbot_portfolio,
-});
+// Read API key from standard naming first, fall back to Vercel Rouge name
+const CHATBOT_KEY = process.env.OPENAI_API_KEY || process.env.chatbot_portfolio || process.env.CHATBOT_PORTFOLIO;
+
+// Only create the client when the key is available — avoids the OpenAI
+// constructor throwing at module-load time when the env var is missing.
+let openai;
+if (CHATBOT_KEY) {
+  openai = new OpenAI({ apiKey: CHATBOT_KEY });
+} else {
+  console.error('OpenAI API key is not set. Set OPENAI_API_KEY in Vercel project settings (Production + Preview scope).');
+}
 
 export default async function handler(req, res) {
   // Only allow POST requests
@@ -12,11 +19,12 @@ export default async function handler(req, res) {
   }
 
   // Check if API key is configured
-  if (!process.env.chatbot_portfolio) {
-    console.error('OpenAI API key is not set. Please set the chatbot_portfolio environment variable.');
+  if (!CHATBOT_KEY) {
+    console.error('OpenAI API key is not set. Please set the OPENAI_API_KEY (or chatbot_portfolio) environment variable in Vercel project settings.');
     return res.status(500).json({ error: 'Server is not configured correctly. Please try again later.' });
   }
 
+  // OpenAI client is guaranteed to exist here — key is set and openai was initialized at module load
   try {
     const { messages } = req.body;
 
