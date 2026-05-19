@@ -1,0 +1,7 @@
+# Local only — never deployed to Vercel
+.env
+.env.local
+.env.*.local
+test-gemini.mjs
+.git/
+.kilo/
