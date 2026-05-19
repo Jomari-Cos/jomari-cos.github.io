@@ -11,6 +11,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Check if API key is configured
+  if (!process.env.chatbot_portfolio) {
+    console.error('OpenAI API key is not set. Please set the chatbot_portfolio environment variable.');
+    return res.status(500).json({ error: 'Server is not configured correctly. Please try again later.' });
+  }
+
   try {
     const { messages } = req.body;
 
